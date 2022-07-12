@@ -1,33 +1,13 @@
 import Song from 'App/Models/Song'
 import Application from '@ioc:Adonis/Core/Application';
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import { parse as parseCSV } from 'csv';
-import { createReadStream } from 'fs';
+import readCSV from 'App/Helpers/readCSV';
 
 const createError = (message: string) => ({ error: message })
 
 interface Response {
   error?: string
   data?: any[]
-}
-
-// TODO: Move to it's own file
-
-interface Options {
-  delimiter?: string
-  from_line?: number
-}
-
-const readCSV = async (filePath: string, options: Options = {}) => {
-  return new Promise<string[][]>((resolve, reject) => {
-    const result: string[][] = []
-
-    createReadStream(filePath)
-      .pipe(parseCSV(options))
-      .on('data', (data) => result.push(data))
-      .on("end", () => resolve(result))
-      .on('error', (error) => reject(error))
-  })
 }
 
 export default class SongsController {
