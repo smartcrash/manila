@@ -24,9 +24,8 @@ test.group('List songs', (group) => {
     const response = await client.get('/api/songs')
     const body = response.body()
 
-    assert.property(body, 'data')
-    assert.isArray(body.data)
-    assert.lengthOf(body.data, expectedLength)
-    assert.containsSubset(body.data, songs.map(song => song.serialize()))
+    assert.isArray(body)
+    assert.lengthOf(body, expectedLength)
+    assert.containsSubset(body, songs.map(song => song.serialize()))
   })
 })

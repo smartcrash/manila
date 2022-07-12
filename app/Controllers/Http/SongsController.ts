@@ -34,10 +34,10 @@ export default class SongsController {
   /**
    * List all songs
    */
-  public async index({ }: HttpContextContract): Promise<Response> {
+  public async index({ }: HttpContextContract): Promise<Song[]> {
     const songs = await Song.all()
 
-    return { data: songs }
+    return songs
   }
 
   /**
