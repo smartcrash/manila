@@ -4,6 +4,7 @@ import {
   Divider,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   HStack,
   Input,
   Table,
@@ -16,35 +17,62 @@ import {
 } from "@chakra-ui/react";
 import { FormEventHandler, useCallback, useState } from "react";
 
+type ApiResponse = { data: any[]; error?: string };
+
+const API_URL = "http://127.0.0.1:3333/api/";
+
 /**
  * List of accepted file types for upload.
  */
 const acceptedFileTypes = [".xlsx", ".xls", ".csv"];
 
 function App() {
+  const [isLoading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
-    event.preventDefault();
 
-    const data = new FormData(event.target as HTMLFormElement);
-  }, []);
+  const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+    async (event) => {
+      event.preventDefault();
+
+      setLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const { data, error } = (await fetch(API_URL + "songs", {
+          method: "POST",
+          body: new FormData(event.target as HTMLFormElement),
+        }).then((response) => response.json())) as ApiResponse;
+
+        if (error) setErrorMessage(error);
+        if (data) console.log({ data });
+      } catch (error) {
+        setErrorMessage((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return (
     <Container paddingTop={"16"}>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit}>
         <HStack alignItems={"flex-start"}>
           <FormControl isInvalid={!!errorMessage}>
             <Input
-              required
               accept={acceptedFileTypes.join(", ")}
               id="file"
               type="file"
               name="file"
               paddingTop="1.5"
+              disabled={isLoading}
             />
             <FormErrorMessage>{errorMessage}</FormErrorMessage>
+            <FormHelperText>
+              Accepted formats: {acceptedFileTypes.join(", ")}
+            </FormHelperText>
           </FormControl>
-          <Button type="submit" colorScheme="red">
+          <Button type="submit" colorScheme="red" isLoading={isLoading}>
             Upload
           </Button>
         </HStack>
