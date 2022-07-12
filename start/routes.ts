@@ -19,9 +19,24 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import Database from '@ioc:Adonis/Lucid/Database'
+import Application from '@ioc:Adonis/Core/Application'
+import Migrator from '@ioc:Adonis/Lucid/Migrator'
 
 Route.group(() => {
   Route
     .resource('songs', 'SongsController')
     .only(['index', 'store'])
 }).prefix('api')
+
+
+
+Route.get('/', async () => {
+  const migrator = new Migrator(Database, Application, {
+    direction: 'up',
+    dryRun: false,
+  })
+
+  await migrator.run()
+  return migrator.migratedFiles
+})
