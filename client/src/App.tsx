@@ -15,7 +15,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { FormEventHandler, useCallback, useState } from "react";
+import useSubmit from "./hooks/useSubmit";
 
 type ApiResponse = { data: any[]; error?: string };
 
@@ -27,52 +27,35 @@ const API_URL = "http://127.0.0.1:3333/api/";
 const acceptedFileTypes = [".xlsx", ".xls", ".csv"];
 
 function App() {
-  const [isLoading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { handleSubmit, loading, error } = useSubmit(async (event) => {
+    const { data, error } = (await fetch(API_URL + "songs", {
+      method: "POST",
+      body: new FormData(event.target as HTMLFormElement),
+    }).then((response) => response.json())) as ApiResponse;
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(
-    async (event) => {
-      event.preventDefault();
-
-      setLoading(true);
-      setErrorMessage(null);
-
-      try {
-        const { data, error } = (await fetch(API_URL + "songs", {
-          method: "POST",
-          body: new FormData(event.target as HTMLFormElement),
-        }).then((response) => response.json())) as ApiResponse;
-
-        if (error) setErrorMessage(error);
-        if (data) console.log({ data });
-      } catch (error) {
-        setErrorMessage((error as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+    if (error) throw new Error(error);
+    if (data) console.log({ data });
+  });
 
   return (
     <Container paddingTop={"16"}>
       <form onSubmit={handleSubmit}>
         <HStack alignItems={"flex-start"}>
-          <FormControl isInvalid={!!errorMessage}>
+          <FormControl isInvalid={!!error?.message}>
             <Input
               accept={acceptedFileTypes.join(", ")}
               id="file"
               type="file"
               name="file"
               paddingTop="1.5"
-              disabled={isLoading}
+              disabled={loading}
             />
-            <FormErrorMessage>{errorMessage}</FormErrorMessage>
+            <FormErrorMessage>{error?.message}</FormErrorMessage>
             <FormHelperText>
               Accepted formats: {acceptedFileTypes.join(", ")}
             </FormHelperText>
           </FormControl>
-          <Button type="submit" colorScheme="red" isLoading={isLoading}>
+          <Button type="submit" colorScheme="red" isLoading={loading}>
             Upload
           </Button>
         </HStack>
