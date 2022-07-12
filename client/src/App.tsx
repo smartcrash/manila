@@ -29,7 +29,6 @@ type Song = {
 type StoreSongResponse = { data?: Song[]; error?: string };
 
 const API_URL = "http://127.0.0.1:3333/api/";
-const url = API_URL + "songs";
 
 /**
  * List of accepted file types for upload.
@@ -37,7 +36,9 @@ const url = API_URL + "songs";
 const acceptedFileTypes = [".xlsx", ".xls", ".csv"];
 
 function App() {
-  const [execute, { data, loading: fetching }] = useFetch<Song[]>(url);
+  const [execute, { data, loading: fetching }] = useFetch<Song[]>(
+    API_URL + "songs"
+  );
 
   const { handleSubmit, loading, error } = useSubmit(async (event) => {
     const { data, error } = (await fetch(API_URL + "songs", {
@@ -50,7 +51,7 @@ function App() {
   });
 
   return (
-    <Container paddingTop={"16"}>
+    <Container paddingTop={"16"} paddingBottom={"16"}>
       <form onSubmit={handleSubmit}>
         <HStack alignItems={"flex-start"}>
           <FormControl isInvalid={!!error?.message}>
