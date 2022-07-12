@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "node ace serve --watch",
     "build": "node ace build --production",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node ace test"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.8.0",
+    "@faker-js/faker": "^7.3.0",
     "@japa/preset-adonis": "^1.1.0",
     "@japa/runner": "^2.0.9",
     "adonis-preset-ts": "^2.1.0",

@@ -1,3 +1,4 @@
+import Song from 'App/Models/Song'
 import Application from '@ioc:Adonis/Core/Application';
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { parse as parseCSV } from 'csv';
@@ -34,7 +35,9 @@ export default class SongsController {
    * List all songs
    */
   public async index({ }: HttpContextContract): Promise<Response> {
-    return {}
+    const songs = await Song.all()
+
+    return { data: songs }
   }
 
   /**
