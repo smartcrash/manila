@@ -11,15 +11,25 @@ import {
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import useFetch from "./hooks/useFetch";
 import useSubmit from "./hooks/useSubmit";
 
-type ApiResponse = { data: any[]; error?: string };
+type Song = {
+  id: number;
+  song_name: string;
+  band: string;
+  year: number;
+};
+
+type StoreSongResponse = { data?: Song[]; error?: string };
 
 const API_URL = "http://127.0.0.1:3333/api/";
+const url = API_URL + "songs";
 
 /**
  * List of accepted file types for upload.
@@ -27,14 +37,16 @@ const API_URL = "http://127.0.0.1:3333/api/";
 const acceptedFileTypes = [".xlsx", ".xls", ".csv"];
 
 function App() {
+  const [execute, { data, loading: fetching }] = useFetch<Song[]>(url);
+
   const { handleSubmit, loading, error } = useSubmit(async (event) => {
     const { data, error } = (await fetch(API_URL + "songs", {
       method: "POST",
       body: new FormData(event.target as HTMLFormElement),
-    }).then((response) => response.json())) as ApiResponse;
+    }).then((response) => response.json())) as StoreSongResponse;
 
     if (error) throw new Error(error);
-    if (data) console.log({ data });
+    if (data) execute();
   });
 
   return (
@@ -63,24 +75,31 @@ function App() {
 
       <Divider marginY={"5"} />
 
-      <TableContainer>
-        <Table variant={"striped"}>
-          <Thead>
-            <Tr>
-              <Th>Song Name</Th>
-              <Th>Band</Th>
-              <Th isNumeric>Year</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            <Tr>
-              <Td>Crazy</Td>
-              <Td>Aerosmith</Td>
-              <Td isNumeric>1990</Td>
-            </Tr>
-          </Tbody>
-        </Table>
-      </TableContainer>
+      {fetching ? (
+        <Text>Loading...</Text>
+      ) : (
+        <TableContainer>
+          <Table variant={"striped"}>
+            <Thead>
+              <Tr>
+                <Th>Song Name</Th>
+                <Th>Band</Th>
+                <Th isNumeric>Year</Th>
+              </Tr>
+            </Thead>
+
+            <Tbody>
+              {data?.map(({ id, song_name, band, year }) => (
+                <Tr key={id}>
+                  <Td>{song_name}</Td>
+                  <Td>{band}</Td>
+                  <Td isNumeric>{year}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      )}
     </Container>
   );
 }
